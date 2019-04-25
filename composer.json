@@ -1,0 +1,29 @@
+{
+    "name": "ourenergy/eiep",
+    "description": "A library for working with Electricity information exchange protocol files",
+    "type": "library",
+    "require": {
+        "php": ">=7.1.0",
+        "league/csv": "^9.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.5"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrew Joll",
+            "email": "andrew.joll@ourenergy.co.nz"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Eiep\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Eiep\\Tests\\": "tests/"
+        }
+    }
+}
