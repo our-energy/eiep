@@ -11,7 +11,6 @@ use League\Csv\Writer;
  */
 interface EiepInterface
 {
-    function validateHeader(array $header): bool;
     static function validateFilename(string $fileName): bool;
     function streamFromFile(string $fileName, callable $callback): void;
     function createWriter(string $fileName): Writer;

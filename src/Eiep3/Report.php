@@ -18,6 +18,7 @@ class Report extends Protocol implements EiepInterface
     const FILE_TYPE = 'ICPHH';
     const SUPPORTED_VERSIONS = ['10.0'];
     const DEFAULT_VERSION = '10.0';
+    const NUM_HEADER_COLUMNS = 13;
 
     const FILE_STATUS_INITIAL = 'I';
     const FILE_STATUS_REPLACEMENT = 'R';
@@ -78,6 +79,10 @@ class Report extends Protocol implements EiepInterface
      */
     public function validateHeader(array $header): bool
     {
+        if (count($header) !== self::NUM_HEADER_COLUMNS) {
+            return false;
+        }
+
         list (
             $recordType,
             $fileType,

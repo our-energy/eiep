@@ -19,6 +19,7 @@ class Report extends Protocol implements EiepInterface
     const FILE_TYPE = 'ICPCONS';
     const SUPPORTED_VERSIONS = ['1.1'];
     const DEFAULT_VERSION = '1.1';
+    const NUM_HEADER_COLUMNS = 11;
 
     /**
      * @var DateTime
@@ -52,6 +53,10 @@ class Report extends Protocol implements EiepInterface
 
     function validateHeader(array $header): bool
     {
+        if (count($header) !== self::NUM_HEADER_COLUMNS) {
+            return false;
+        }
+
         list (
             $recordType,
             $fileType,
@@ -108,6 +113,11 @@ class Report extends Protocol implements EiepInterface
     static function validateFilename(string $fileName): bool
     {
         // TODO: Implement validateFilename() method.
+    }
+
+    function writeRecords(string $fileName, array $records): void
+    {
+        // TODO: Implement writeRecords() method.
     }
 
     /**

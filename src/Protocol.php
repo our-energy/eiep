@@ -252,4 +252,11 @@ abstract class Protocol
 
         return $writer;
     }
+
+    /**
+     * @param array $header
+     *
+     * @return bool
+     */
+    abstract function validateHeader(array $header): bool;
 }
