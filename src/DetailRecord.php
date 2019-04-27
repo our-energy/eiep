@@ -14,6 +14,12 @@ abstract class DetailRecord
     const NULL_COLUMN = 'null';
     const DECIMAL_PLACES = 2;
 
+    const READING_TYPE_FINAL = 'F';
+    const READING_TYPE_ESTIMATE = 'E';
+
+    const FLOW_DIRECTION_INJECT = 'I';
+    const FLOW_DIRECTION_EXTRACT = 'X';
+
     /**
      * @var string
      */
@@ -93,10 +99,14 @@ abstract class DetailRecord
 
     /**
      * @param string $icpIdentifier
+     *
+     * @return DetailRecord
      */
-    public function setIcpIdentifier(string $icpIdentifier): void
+    public function setIcpIdentifier(string $icpIdentifier): DetailRecord
     {
         $this->icpIdentifier = $this->removeWhitespace($icpIdentifier);
+
+        return $this;
     }
 
     /**
@@ -109,10 +119,14 @@ abstract class DetailRecord
 
     /**
      * @param string $streamIdentifier
+     *
+     * @return DetailRecord
      */
-    public function setStreamIdentifier(string $streamIdentifier): void
+    public function setStreamIdentifier(string $streamIdentifier): DetailRecord
     {
         $this->streamIdentifier = $this->removeWhitespace($streamIdentifier);
+
+        return $this;
     }
 
     /**
@@ -125,10 +139,19 @@ abstract class DetailRecord
 
     /**
      * @param string $readingType
+     *
+     * @return DetailRecord
+     * @throws \Exception
      */
-    public function setReadingType(string $readingType): void
+    public function setReadingType(string $readingType): DetailRecord
     {
+        if (!in_array($readingType, [self::READING_TYPE_ESTIMATE, self::READING_TYPE_FINAL])) {
+            throw new \Exception("Invalid reading type");
+        }
+
         $this->readingType = $readingType;
+
+        return $this;
     }
 
     /**
@@ -141,10 +164,14 @@ abstract class DetailRecord
 
     /**
      * @param DateTime $date
+     *
+     * @return DetailRecord
      */
-    public function setDate(DateTime $date): void
+    public function setDate(DateTime $date): DetailRecord
     {
         $this->date = $date;
+
+        return $this;
     }
 
     /**
@@ -158,15 +185,18 @@ abstract class DetailRecord
     /**
      * @param int $tradingPeriod
      *
+     * @return DetailRecord
      * @throws \Exception
      */
-    public function setTradingPeriod(int $tradingPeriod): void
+    public function setTradingPeriod(int $tradingPeriod): DetailRecord
     {
         if ($tradingPeriod < 0 || $tradingPeriod > 50) {
             throw new \Exception("Invalid trading period {$tradingPeriod}, expected 1 - 50");
         }
 
         $this->tradingPeriod = $tradingPeriod;
+
+        return $this;
     }
 
     /**
@@ -178,11 +208,15 @@ abstract class DetailRecord
     }
 
     /**
-     * @param float $activeEnergy
+     * @param float|null $activeEnergy
+     *
+     * @return DetailRecord
      */
-    public function setActiveEnergy(?float $activeEnergy): void
+    public function setActiveEnergy(?float $activeEnergy): DetailRecord
     {
         $this->activeEnergy = $activeEnergy;
+
+        return $this;
     }
 
     /**
@@ -194,11 +228,15 @@ abstract class DetailRecord
     }
 
     /**
-     * @param float $reactiveEnergy
+     * @param float|null $reactiveEnergy
+     *
+     * @return DetailRecord
      */
-    public function setReactiveEnergy(?float $reactiveEnergy): void
+    public function setReactiveEnergy(?float $reactiveEnergy): DetailRecord
     {
         $this->reactiveEnergy = $reactiveEnergy;
+
+        return $this;
     }
 
     /**
@@ -210,11 +248,15 @@ abstract class DetailRecord
     }
 
     /**
-     * @param float $apparentEnergy
+     * @param float|null $apparentEnergy
+     *
+     * @return DetailRecord
      */
-    public function setApparentEnergy(?float $apparentEnergy): void
+    public function setApparentEnergy(?float $apparentEnergy): DetailRecord
     {
         $this->apparentEnergy = $apparentEnergy;
+
+        return $this;
     }
 
     /**
@@ -227,10 +269,19 @@ abstract class DetailRecord
 
     /**
      * @param string $flowDirection
+     *
+     * @return DetailRecord
+     * @throws \Exception
      */
-    public function setFlowDirection(string $flowDirection): void
+    public function setFlowDirection(string $flowDirection): DetailRecord
     {
+        if (!in_array($flowDirection, [self::FLOW_DIRECTION_INJECT, self::FLOW_DIRECTION_EXTRACT])) {
+            throw new \Exception("Invalid energy flow direction");
+        }
+
         $this->flowDirection = $flowDirection;
+
+        return $this;
     }
 
     /**
@@ -242,11 +293,15 @@ abstract class DetailRecord
     }
 
     /**
-     * @param string $streamType
+     * @param string|null $streamType
+     *
+     * @return DetailRecord
      */
-    public function setStreamType(?string $streamType): void
+    public function setStreamType(?string $streamType): DetailRecord
     {
         $this->streamType = $streamType;
+
+        return $this;
     }
 
     /**

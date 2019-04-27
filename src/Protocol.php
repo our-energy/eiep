@@ -126,7 +126,6 @@ abstract class Protocol
         $this->recipient = $recipient;
     }
 
-
     /**
      * @return string
      */
@@ -252,28 +251,5 @@ abstract class Protocol
         $writer->insertOne($this->getHeader());
 
         return $writer;
-    }
-
-    /**
-     * @param string $fileName
-     * @param array $records
-     *
-     * @throws \League\Csv\CannotInsertRecord
-     */
-    public function writeRecords(string $fileName, array $records): void
-    {
-        $stream = fopen($fileName, 'w');
-
-        $writer = Writer::createFromStream($stream);
-
-        $this->setNumRecords(count($records));
-
-        // Write the HDR
-        $writer->insertOne($this->getHeader());
-
-        // Write the DET items
-        $writer->insertAll(array_map(function (DetailRecord $record) {
-            return $record->toArray();
-        }, $records));
     }
 }
