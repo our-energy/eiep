@@ -3,7 +3,7 @@
 
 # Electricity Information Exchange Protocol (EIEP)
 
-A PHP wrapper for the Electricity Authority's EIEP data files. Supports PHP 7.1+.
+A PHP library for working with the Electricity Authority's EIEP data files. Supports PHP 7.1+.
 
 Currently supported protocols and versions;
 
