@@ -1,17 +1,17 @@
 <?php
 
-namespace Eiep\Tests\Eiep3;
+namespace Eiep\Tests\Eiep13a;
 
-use Eiep\Eiep3\DetailRecord;
-use Eiep\Eiep3\Report;
+use Eiep\Eiep13a\DetailRecord;
+use Eiep\Eiep13a\Report;
 use PHPUnit\Framework\TestCase;
 
 class ReportTest extends TestCase
 {
     public function testValidateFileName()
     {
-        $this->assertTrue(Report::validateFilename("SNDR_E_RCPT_ICPHH_201904_20190421_000.csv"));
-        $this->assertFalse(Report::validateFilename("SNDR_E_RCPT_ICPCONS_201904_20190421_000.csv"));
+        $this->assertTrue(Report::validateFilename("SNDR_E_RCPT_ICPCONS_201904_20190421_000.csv"));
+        $this->assertFalse(Report::validateFilename("SNDR_E_RCPT_ICPHH_201904_20190421_000.csv"));
         $this->assertFalse(Report::validateFilename("test file.csv"));
     }
 
@@ -19,7 +19,7 @@ class ReportTest extends TestCase
     {
         $report = new Report();
 
-        $fileName = "tests/Data/eiep3-valid.txt";
+        $fileName = "tests/Data/eiep13a-valid.txt";
 
         $records = [];
         $icps = [];
@@ -30,34 +30,32 @@ class ReportTest extends TestCase
         });
 
         $this->assertEquals($report->getNumRecords(), count($records));
-        $this->assertEquals($report->getNumRecords(),96);
-        $this->assertEquals($report->getUtilityType(), 'E');
-        $this->assertEquals($report->getFileStatus(), 'I');
-        $this->assertEquals($report->getVersion(), '10.0');
+        $this->assertEquals($report->getNumRecords(),48);
+        $this->assertEquals($report->getVersion(), '1.1');
         $this->assertEquals($report->getSender(), 'SNDR');
         $this->assertEquals($report->getOnBehalfOf(), 'BHLF');
         $this->assertEquals($report->getRecipient(), 'RCPT');
         $this->assertEquals($report->getIdentifier(), '000');
         $this->assertEquals($report->getReportDate(), '21/04/2019');
-        $this->assertEquals($report->getReportMonth(), '201904');
-        $this->assertEquals($report->getReportTime(), '21:11:04');
+        $this->assertEquals($report->getReportStartDate()->format("d/m/Y"), '01/10/2014');
+        $this->assertEquals($report->getReportEndDate()->format("d/m/Y"), '22/03/2016');
+
         $this->assertEquals($report->getHeader(), [
-            'HDR', 'ICPHH', '10.0', 'SNDR', 'BHLF', 'RCPT', '21/04/2019', '21:11:04', '000', '00000096', '201904', 'E', 'I'
+            'HDR', 'ICPCONS', '1.1', 'SNDR', 'BHLF', 'RCPT', '21/04/2019', '000', '00000048', '01/10/2014', '22/03/2016'
         ]);
 
         $icps = array_values(array_unique($icps));
-        $this->assertEquals(count($icps), 2);
+        $this->assertEquals(count($icps), 1);
         $this->assertEquals($icps, [
-            'XXXXXXXXXXXXXXX',
-            'AAAAAAAAAAAAAAA'
+            'XXXXXXXXXXXXXXX'
         ]);
 
-        $this->assertEquals($report->getFileName(), "SNDR_E_RCPT_ICPHH_201904_20190421_000.txt");
+        $this->assertEquals($report->getFileName(), "SNDR_RCPT_ICPCONS_000.txt");
     }
 
     public function testReadStream()
     {
-        $fileName = "tests/Data/eiep3-valid.txt";
+        $fileName = "tests/Data/eiep13a-valid.txt";
 
         $stream = fopen($fileName, "r");
         $records = [];
@@ -69,7 +67,7 @@ class ReportTest extends TestCase
         });
 
         $this->assertEquals($report->getNumRecords(), count($records));
-        $this->assertEquals($report->getNumRecords(),96);
+        $this->assertEquals($report->getNumRecords(),48);
     }
 
     public function testReadInvalidStream()
@@ -90,7 +88,7 @@ class ReportTest extends TestCase
     {
         $report = new Report();
 
-        $fileName = "tests/Data/eiep3-empty.txt";
+        $fileName = "tests/Data/eiep13a-empty.txt";
 
         $records = [];
 
@@ -100,30 +98,6 @@ class ReportTest extends TestCase
 
         $this->assertEquals($report->getNumRecords(), count($records));
         $this->assertEquals($report->getNumRecords(),0);
-    }
-
-    public function testSetFileStatus()
-    {
-        $report = new Report();
-
-        $report->setFileStatus(Report::FILE_STATUS_REPLACEMENT);
-
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage("File status something is invalid");
-
-        $report->setFileStatus("something");
-    }
-
-    public function testSetUtilityType()
-    {
-        $report = new Report();
-
-        $report->setUtilityType(Report::UTILITY_TYPE_ELECTRICITY);
-
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage("Utility type Nuclear is invalid");
-
-        $report->setUtilityType("Nuclear");
     }
 
     public function testInvalidHeader()
@@ -145,11 +119,11 @@ class ReportTest extends TestCase
         $report = new Report();
         $report->setReportDate(new \DateTime("2019-04-27 00:00:00"));
 
-        $report->writeRecords("/tmp/output-eiep3.txt", []);
+        $report->writeRecords("/tmp/output-eiep13a.txt", []);
 
-        $output = file_get_contents("/tmp/output-eiep3.txt");
+        $output = file_get_contents("/tmp/output-eiep13a.txt");
 
-        $this->assertEquals($output, "HDR,ICPHH,10.0,,,,27/04/2019,00:00:00,,00000000,201904,," . PHP_EOL);
+        $this->assertEquals("HDR,ICPCONS,1.1,,,,27/04/2019,,00000000,02/05/2019,02/05/2019" . PHP_EOL, $output);
     }
 
     public function testWriteEmptyRecords()
@@ -157,24 +131,24 @@ class ReportTest extends TestCase
         $report = new Report();
         $report->setReportDate(new \DateTime("2019-04-27 00:00:00"));
 
+        $currentDate = date(DetailRecord::TIME_FORMAT);
+
         $records = [
             new DetailRecord(),
             new DetailRecord()
         ];
 
-        $report->writeRecords("/tmp/output-eiep3.txt", $records);
-        $output = file_get_contents("/tmp/output-eiep3.txt");
-
-        $currentDate = date(DetailRecord::DATE_FORMAT);
+        $report->writeRecords("/tmp/output-eiep13a.txt", $records);
+        $output = file_get_contents("/tmp/output-eiep13a.txt");
 
         $expected = <<<CSV
-HDR,ICPHH,10.0,,,,27/04/2019,00:00:00,,00000002,201904,,
-DET,,,,$currentDate,,null,null,null,,null
-DET,,,,$currentDate,,null,null,null,,null
+HDR,ICPCONS,1.1,,,,27/04/2019,,00000002,02/05/2019,02/05/2019
+DET,,,,,,,,,"$currentDate","$currentDate",,,
+DET,,,,,,,,,"$currentDate","$currentDate",,,
 
 CSV;
 
-        $this->assertEquals($output, $expected);
+        $this->assertEquals($expected, $output);
         $this->assertEquals($report->getNumRecords(), 2);
     }
 
@@ -182,8 +156,6 @@ CSV;
     {
         $report = new Report();
         $report->setReportDate(new \DateTime("2019-04-27 00:00:00"));
-        $report->setUtilityType(Report::UTILITY_TYPE_ELECTRICITY);
-        $report->setFileStatus(Report::FILE_STATUS_REPLACEMENT);
         $report->setNumRecords(1);
         $report->setSender("Company");
         $report->setRecipient("Recipient");
@@ -194,15 +166,19 @@ CSV;
         $recordDate = new \DateTime("2019-04-27 00:00:00");
 
         $record
+            ->setAuthorisationCode("AAAAAAAAAAAAAAAAAAAA")
             ->setIcpIdentifier("1234567890")
-            ->setStreamIdentifier("ABCDEFG")
-            ->setReadingType(DetailRecord::READING_TYPE_FINAL)
-            ->setDate($recordDate)
-            ->setTradingPeriod(48)
+            ->setResponseCode(DetailRecord::RESPONSE_ACCEPTED)
+            ->setNzDstAdjustment("NZST")
+            ->setMeteringComponent("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
+            ->setFlowDirection(DetailRecord::FLOW_DIRECTION_EXTRACT)
+            ->setRegisterCode("000000")
+            ->setAvailabilityPeriod("000000")
+            ->setReadPeriodStart($recordDate)
+            ->setReadPeriodEnd($recordDate)
+            ->setReadStatus(DetailRecord::STATUS_ACTUAL)
             ->setActiveEnergy(1)
-            ->setReactiveEnergy(2)
-            ->setApparentEnergy(3)
-            ->setFlowDirection(DetailRecord::FLOW_DIRECTION_EXTRACT);
+            ->setReactiveEnergy(2);
 
         $records = [
             $record,
@@ -210,26 +186,24 @@ CSV;
             $record
         ];
 
-        $report->writeRecords("/tmp/output-eiep3.txt", $records);
-        $output = file_get_contents("/tmp/output-eiep3.txt");
+        $report->writeRecords("/tmp/output-eiep13a.txt", $records);
+        $output = file_get_contents("/tmp/output-eiep13a.txt");
 
         $expected = <<<CSV
-HDR,ICPHH,10.0,Comp,Beha,Reci,27/04/2019,00:00:00,1234567890,00000003,201904,E,R
-DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null
-DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null
-DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null
+HDR,ICPCONS,1.1,Comp,Beha,Reci,27/04/2019,1234567890,00000003,02/05/2019,02/05/2019
+DET,AAAAAAAAAAAAAAAAAAAA,1234567890,000,NZST,CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC,X,000000,000000,"27/04/2019 00:00:00","27/04/2019 00:00:00",RD,1,2
+DET,AAAAAAAAAAAAAAAAAAAA,1234567890,000,NZST,CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC,X,000000,000000,"27/04/2019 00:00:00","27/04/2019 00:00:00",RD,1,2
+DET,AAAAAAAAAAAAAAAAAAAA,1234567890,000,NZST,CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC,X,000000,000000,"27/04/2019 00:00:00","27/04/2019 00:00:00",RD,1,2
 
 CSV;
 
-        $this->assertEquals($output, $expected);
+        $this->assertEquals($expected, $output);
     }
 
     public function testWriteStream()
     {
         $report = new Report();
         $report->setReportDate(new \DateTime("2019-04-27 00:00:00"));
-        $report->setUtilityType(Report::UTILITY_TYPE_ELECTRICITY);
-        $report->setFileStatus(Report::FILE_STATUS_REPLACEMENT);
         $report->setNumRecords(3);
         $report->setSender("Company");
         $report->setRecipient("Recipient");
@@ -240,15 +214,19 @@ CSV;
         $recordDate = new \DateTime("2019-04-27 00:00:00");
 
         $record
+            ->setAuthorisationCode("AAAAAAAAAAAAAAAAAAAA")
             ->setIcpIdentifier("1234567890")
-            ->setStreamIdentifier("ABCDEFG")
-            ->setReadingType(DetailRecord::READING_TYPE_FINAL)
-            ->setDate($recordDate)
-            ->setTradingPeriod(48)
+            ->setResponseCode(DetailRecord::RESPONSE_ACCEPTED)
+            ->setNzDstAdjustment("NZST")
+            ->setMeteringComponent("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
+            ->setFlowDirection(DetailRecord::FLOW_DIRECTION_EXTRACT)
+            ->setRegisterCode("000000")
+            ->setAvailabilityPeriod("000000")
+            ->setReadPeriodStart($recordDate)
+            ->setReadPeriodEnd($recordDate)
+            ->setReadStatus(DetailRecord::STATUS_ACTUAL)
             ->setActiveEnergy(1)
-            ->setReactiveEnergy(2)
-            ->setApparentEnergy(3)
-            ->setFlowDirection(DetailRecord::FLOW_DIRECTION_EXTRACT);
+            ->setReactiveEnergy(2);
 
         $records = [
             $record,
@@ -256,7 +234,7 @@ CSV;
             $record
         ];
 
-        $writer = $report->createWriter("/tmp/output-eiep13a.txt");
+        $writer = $report->createWriter("/tmp/output-eiep3.txt");
 
         $writer->insertAll(array_map(function (DetailRecord $record) {
             return $record->toArray();
@@ -265,13 +243,13 @@ CSV;
         $output = file_get_contents("/tmp/output-eiep3.txt");
 
         $expected = <<<CSV
-HDR,ICPHH,10.0,Comp,Beha,Reci,27/04/2019,00:00:00,1234567890,00000003,201904,E,R
-DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null
-DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null
-DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null
+HDR,ICPCONS,1.1,Comp,Beha,Reci,27/04/2019,1234567890,00000003,02/05/2019,02/05/2019
+DET,AAAAAAAAAAAAAAAAAAAA,1234567890,000,NZST,CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC,X,000000,000000,"27/04/2019 00:00:00","27/04/2019 00:00:00",RD,1,2
+DET,AAAAAAAAAAAAAAAAAAAA,1234567890,000,NZST,CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC,X,000000,000000,"27/04/2019 00:00:00","27/04/2019 00:00:00",RD,1,2
+DET,AAAAAAAAAAAAAAAAAAAA,1234567890,000,NZST,CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC,X,000000,000000,"27/04/2019 00:00:00","27/04/2019 00:00:00",RD,1,2
 
 CSV;
 
-        $this->assertEquals($output, $expected);
+        $this->assertEquals($expected, $output);
     }
 }

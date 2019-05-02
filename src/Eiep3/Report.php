@@ -4,7 +4,6 @@ namespace Eiep\Eiep3;
 
 use Eiep\Protocol;
 use Eiep\EiepInterface;
-use League\Csv\Reader;
 use League\Csv\Writer;
 use DateTime;
 
@@ -13,12 +12,15 @@ use DateTime;
  *
  * @package Eiep\Eiep3
  */
-class Report extends Protocol implements EiepInterface
+class Report implements EiepInterface
 {
+    use Protocol;
+
     const FILE_TYPE = 'ICPHH';
     const SUPPORTED_VERSIONS = ['10.0'];
     const DEFAULT_VERSION = '10.0';
     const NUM_HEADER_COLUMNS = 13;
+    const DATE_FORMAT = 'd/m/Y';
 
     const FILE_STATUS_INITIAL = 'I';
     const FILE_STATUS_REPLACEMENT = 'R';
@@ -121,7 +123,7 @@ class Report extends Protocol implements EiepInterface
 
         $this->header = $header;
 
-        $this->reportDateTime = DateTime::createFromFormat("d/m/Y", $this->reportDate);
+        $this->reportDateTime = DateTime::createFromFormat(self::DATE_FORMAT, $this->reportDate);
         $this->reportDateTime->setTime(0, 0, 0);
 
         return true;
@@ -165,7 +167,22 @@ class Report extends Protocol implements EiepInterface
      */
     public function streamFromFile(string $fileName, callable $callback): void
     {
-        parent::streamFromFile($fileName, function(array $row) use ($callback) {
+        $this->createReadStream($fileName, function(array $row) use ($callback) {
+            $record = DetailRecord::createFromRow($row);
+
+            $callback($record);
+        });
+    }
+
+    /**
+     * @param $stream
+     * @param callable $callback
+     *
+     * @throws \Exception
+     */
+    public function readFromStream($stream, callable $callback): void
+    {
+        $this->readStream($stream, function(array $row) use ($callback) {
             $record = DetailRecord::createFromRow($row);
 
             $callback($record);

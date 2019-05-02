@@ -15,6 +15,16 @@ class DetailRecord extends BaseDetailRecord
 {
     const NUM_COLUMNS = 14;
     const TIME_FORMAT = 'd/m/Y H:i:s';
+    const DATE_FORMAT = 'd/m/Y';
+
+    const RESPONSE_ACCEPTED = '000';
+    const RESPONSE_REJECTED_NO_ADDRESS = '001';
+    const RESPONSE_REJECTED_NO_ICP = '002';
+    const RESPONSE_REJECTED_NO_CUSTOMER = '003';
+    const RESPONSE_REJECTED_NO_AUTHORITY = '004';
+
+    const STATUS_ACTUAL = 'RD';
+    const STATUS_ESTIMATED = 'ES';
 
     /**
      * @var string
@@ -60,6 +70,15 @@ class DetailRecord extends BaseDetailRecord
      * @var string
      */
     private $readStatus;
+
+    /**
+     * DetailRecord constructor.
+     */
+    public function __construct()
+    {
+        $this->setReadPeriodStart(new DateTime());
+        $this->setReadPeriodEnd(new DateTime());
+    }
 
     /**
      * @param array $data
@@ -108,8 +127,8 @@ class DetailRecord extends BaseDetailRecord
         $record->setRegisterCode($registerCode);
         $record->setAvailabilityPeriod($availabilityPeriod);
         $record->setReadStatus($readStatus);
-        $record->setActiveEnergy($activeUnits);
-        $record->setReactiveEnergy($reactiveUnits);
+        $record->setActiveEnergy((float)$activeUnits);
+        $record->setReactiveEnergy((float)$reactiveUnits);
 
         $record->setReadPeriodStart(DateTime::createFromFormat(self::TIME_FORMAT, $readPeriodStart));
         $record->setReadPeriodEnd(DateTime::createFromFormat(self::TIME_FORMAT, $readPeriodEnd));
@@ -121,11 +140,11 @@ class DetailRecord extends BaseDetailRecord
     {
         return [
             'DET',
-            $this->authorisationCode,
-            $this->icpIdentifier,
-            $this->responseCode,
-            $this->nzDstAdjustment,
-            $this->meteringComponent,
+            substr($this->authorisationCode, 0, 20),
+            substr($this->icpIdentifier, 0, 15),
+            substr($this->responseCode, 0, 3),
+            substr($this->nzDstAdjustment, 0, 4),
+            substr($this->meteringComponent, 0, 30),
             $this->flowDirection,
             $this->registerCode,
             $this->availabilityPeriod,
@@ -139,10 +158,14 @@ class DetailRecord extends BaseDetailRecord
 
     /**
      * @param string $authorisationCode
+     *
+     * @return DetailRecord
      */
-    public function setAuthorisationCode(string $authorisationCode): void
+    public function setAuthorisationCode(string $authorisationCode): DetailRecord
     {
         $this->authorisationCode = $authorisationCode;
+
+        return $this;
     }
 
     /**
@@ -155,10 +178,25 @@ class DetailRecord extends BaseDetailRecord
 
     /**
      * @param string $responseCode
+     *
+     * @return DetailRecord
+     * @throws \Exception
      */
-    public function setResponseCode(string $responseCode): void
+    public function setResponseCode(string $responseCode): DetailRecord
     {
+        if (!in_array($responseCode, [
+            self::RESPONSE_ACCEPTED,
+            self::RESPONSE_REJECTED_NO_ADDRESS,
+            self::RESPONSE_REJECTED_NO_ICP,
+            self::RESPONSE_REJECTED_NO_CUSTOMER,
+            self::RESPONSE_REJECTED_NO_AUTHORITY
+        ])) {
+            throw new \Exception("Invalid response code");
+        }
+
         $this->responseCode = $responseCode;
+
+        return $this;
     }
 
     /**
@@ -179,10 +217,14 @@ class DetailRecord extends BaseDetailRecord
 
     /**
      * @param string $nzDstAdjustment
+     *
+     * @return DetailRecord
      */
-    public function setNzDstAdjustment(string $nzDstAdjustment): void
+    public function setNzDstAdjustment(string $nzDstAdjustment): DetailRecord
     {
         $this->nzDstAdjustment = $nzDstAdjustment;
+
+        return $this;
     }
 
     /**
@@ -195,10 +237,14 @@ class DetailRecord extends BaseDetailRecord
 
     /**
      * @param string $meteringComponent
+     *
+     * @return DetailRecord
      */
-    public function setMeteringComponent(string $meteringComponent): void
+    public function setMeteringComponent(string $meteringComponent): DetailRecord
     {
         $this->meteringComponent = $meteringComponent;
+
+        return $this;
     }
 
     /**
@@ -211,10 +257,14 @@ class DetailRecord extends BaseDetailRecord
 
     /**
      * @param string $registerCode
+     *
+     * @return DetailRecord
      */
-    public function setRegisterCode(string $registerCode): void
+    public function setRegisterCode(string $registerCode): DetailRecord
     {
         $this->registerCode = $registerCode;
+
+        return $this;
     }
 
     /**
@@ -227,10 +277,14 @@ class DetailRecord extends BaseDetailRecord
 
     /**
      * @param string $availabilityPeriod
+     *
+     * @return DetailRecord
      */
-    public function setAvailabilityPeriod(string $availabilityPeriod): void
+    public function setAvailabilityPeriod(string $availabilityPeriod): DetailRecord
     {
         $this->availabilityPeriod = $availabilityPeriod;
+
+        return $this;
     }
 
     /**
@@ -243,10 +297,14 @@ class DetailRecord extends BaseDetailRecord
 
     /**
      * @param DateTime $readPeriodStart
+     *
+     * @return DetailRecord
      */
-    public function setReadPeriodStart(DateTime $readPeriodStart): void
+    public function setReadPeriodStart(DateTime $readPeriodStart): DetailRecord
     {
         $this->readPeriodStart = $readPeriodStart;
+
+        return $this;
     }
 
     /**
@@ -259,10 +317,14 @@ class DetailRecord extends BaseDetailRecord
 
     /**
      * @param DateTime $readPeriodEnd
+     *
+     * @return DetailRecord
      */
-    public function setReadPeriodEnd(DateTime $readPeriodEnd): void
+    public function setReadPeriodEnd(DateTime $readPeriodEnd): DetailRecord
     {
         $this->readPeriodEnd = $readPeriodEnd;
+
+        return $this;
     }
 
     /**
@@ -275,9 +337,20 @@ class DetailRecord extends BaseDetailRecord
 
     /**
      * @param string $readStatus
+     *
+     * @return DetailRecord
+     * @throws \Exception
      */
-    public function setReadStatus(string $readStatus): void
+    public function setReadStatus(string $readStatus): DetailRecord
     {
+        if (!in_array($readStatus, [self::STATUS_ACTUAL, self::STATUS_ESTIMATED])) {
+            throw new \Exception("Invalid read status");
+        }
+
         $this->readStatus = $readStatus;
+
+        return $this;
     }
+
+
 }

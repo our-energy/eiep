@@ -14,6 +14,7 @@ use DateTime;
 class DetailRecord extends BaseDetailRecord
 {
     const NUM_COLUMNS = 11;
+    const DATE_FORMAT = 'd/m/Y';
 
     /**
      * Format the record for writing to the CSV file
@@ -27,7 +28,7 @@ class DetailRecord extends BaseDetailRecord
             $this->icpIdentifier,
             $this->streamIdentifier,
             $this->readingType,
-            $this->date->format('d/m/Y'),
+            $this->date->format(self::DATE_FORMAT),
             $this->tradingPeriod,
             $this->formatNumber($this->activeEnergy),
             $this->formatNumber($this->reactiveEnergy),
@@ -76,13 +77,13 @@ class DetailRecord extends BaseDetailRecord
         $record->setStreamIdentifier($streamIdentifier);
         $record->setReadingType($readingType);
         $record->setTradingPeriod($tradingPeriod);
-        $record->setActiveEnergy($activeEnergy);
-        $record->setReactiveEnergy($reactiveEnergy);
-        $record->setApparentEnergy($apparentEnergy);
+        $record->setActiveEnergy((float)$activeEnergy);
+        $record->setReactiveEnergy((float)$reactiveEnergy);
+        $record->setApparentEnergy((float)$apparentEnergy);
         $record->setFlowDirection($flowDirection);
         $record->setStreamType($streamType);
 
-        $dateTime = DateTime::createFromFormat("d/m/Y", $date);
+        $dateTime = DateTime::createFromFormat(self::DATE_FORMAT, $date);
         $dateTime->setTime(0, 0, 0);
 
         $record->setDate($dateTime);

@@ -4,22 +4,25 @@ namespace Eiep\Eiep13a;
 
 use Eiep\Protocol;
 use Eiep\EiepInterface;
-use Eiep\Eiep13a\DetailRecord;
-use League\Csv\Reader;
-use League\Csv\Writer;
 use DateTime;
+use League\Csv\Writer;
 
 /**
  * Class Report
  *
  * @package Eiep\Eiep13a
  */
-class Report extends Protocol implements EiepInterface
+class Report implements EiepInterface
 {
+    use Protocol;
+
     const FILE_TYPE = 'ICPCONS';
     const SUPPORTED_VERSIONS = ['1.1'];
     const DEFAULT_VERSION = '1.1';
     const NUM_HEADER_COLUMNS = 11;
+    const DATE_FORMAT = 'd/m/Y';
+
+    const FILENAME_REGEX = "/^([A-Z]{4})_([A-Z])_([A-Z]{4})_([A-Z]{1,7})_([0-9]{6})_([0-9]{8})_(.*?).(csv|txt)$/";
 
     /**
      * @var DateTime
@@ -30,6 +33,17 @@ class Report extends Protocol implements EiepInterface
      * @var DateTime
      */
     private $reportEndDate;
+
+    /**
+     * Report constructor.
+     */
+    public function __construct()
+    {
+        $this->version = self::DEFAULT_VERSION;
+        $this->setReportDate(new DateTime());
+        $this->setReportStartDate(new DateTime());
+        $this->setReportEndDate(new DateTime());
+    }
 
     /**
      * @return array
@@ -46,11 +60,16 @@ class Report extends Protocol implements EiepInterface
             $this->reportDate,
             substr($this->identifier, 0, 15),
             str_pad($this->numRecords, 8, "0", STR_PAD_LEFT),
-            $this->reportStartDate->format("d/m/Y"),
-            $this->reportEndDate->format("d/m/Y")
+            $this->reportStartDate->format(self::DATE_FORMAT),
+            $this->reportEndDate->format(self::DATE_FORMAT)
         ];
     }
 
+    /**
+     * @param array $header
+     *
+     * @return bool
+     */
     function validateHeader(array $header): bool
     {
         if (count($header) !== self::NUM_HEADER_COLUMNS) {
@@ -85,7 +104,7 @@ class Report extends Protocol implements EiepInterface
 
         $this->header = $header;
 
-        $this->reportDateTime = DateTime::createFromFormat("d/m/Y", $this->reportDate);
+        $this->reportDateTime = DateTime::createFromFormat(self::DATE_FORMAT, $this->reportDate);
         $this->reportDateTime->setTime(0, 0, 0);
 
         $this->reportStartDate = DateTime::createFromFormat("d/m/Y", $reportStartDate);
@@ -110,14 +129,57 @@ class Report extends Protocol implements EiepInterface
         );
     }
 
+    /**
+     * @param string $fileName
+     *
+     * @return bool
+     */
     static function validateFilename(string $fileName): bool
     {
-        // TODO: Implement validateFilename() method.
+        $matches = [];
+
+        if (preg_match(self::FILENAME_REGEX, $fileName, $matches)) {
+            list (,
+                $sender,
+                $utilityType,
+                $recipient,
+                $fileType,
+                $reportMonth,
+                $reportDate,
+                $identifier
+                ) = $matches;
+
+            if ($fileType !== self::FILE_TYPE) {
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
+    /**
+     * @param string $fileName
+     * @param array $records
+     *
+     * @throws \League\Csv\CannotInsertRecord
+     */
     function writeRecords(string $fileName, array $records): void
     {
-        // TODO: Implement writeRecords() method.
+        $stream = fopen($fileName, 'w');
+
+        $writer = Writer::createFromStream($stream);
+
+        $this->setNumRecords(count($records));
+
+        // Write the HDR
+        $writer->insertOne($this->getHeader());
+
+        // Write the DET items
+        $writer->insertAll(array_map(function (DetailRecord $record) {
+            return $record->toArray();
+        }, $records));
     }
 
     /**
@@ -128,7 +190,22 @@ class Report extends Protocol implements EiepInterface
      */
     public function streamFromFile(string $fileName, callable $callback): void
     {
-        parent::streamFromFile($fileName, function(array $row) use ($callback) {
+        $this->createReadStream($fileName, function(array $row) use ($callback) {
+            $record = DetailRecord::createFromRow($row);
+
+            $callback($record);
+        });
+    }
+
+    /**
+     * @param $stream
+     * @param callable $callback
+     *
+     * @throws \Exception
+     */
+    public function readFromStream($stream, callable $callback): void
+    {
+        $this->readStream($stream, function(array $row) use ($callback) {
             $record = DetailRecord::createFromRow($row);
 
             $callback($record);

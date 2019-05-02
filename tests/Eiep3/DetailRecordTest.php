@@ -3,7 +3,6 @@
 namespace Eiep\Tests\Eiep3;
 
 use Eiep\Eiep3\DetailRecord;
-use Eiep\Eiep3\Report;
 use PHPUnit\Framework\TestCase;
 
 class DetailRecordTest extends TestCase

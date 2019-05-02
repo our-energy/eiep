@@ -7,11 +7,11 @@ use League\Csv\Reader;
 use League\Csv\Writer;
 
 /**
- * Class Protocol
+ * Trait
  *
  * @package Eiep
  */
-abstract class Protocol
+trait Protocol
 {
     /**
      * @var string
@@ -164,7 +164,7 @@ abstract class Protocol
      */
     public function getReportDate(): string
     {
-        return $this->reportDateTime->format("d/m/Y");
+        return $this->reportDateTime->format(self::DATE_FORMAT);
     }
 
     /**
@@ -174,7 +174,7 @@ abstract class Protocol
     {
         $this->reportDateTime = $dateTime;
 
-        $this->reportDate = $dateTime->format("d/m/Y");
+        $this->reportDate = $dateTime->format(self::DATE_FORMAT);
         $this->reportMonth = $dateTime->format("Ym");
         $this->reportTime = $dateTime->format("H:i:s");
     }
@@ -201,9 +201,24 @@ abstract class Protocol
      *
      * @throws \Exception
      */
-    public function streamFromFile(string $fileName, callable $callback): void
+    private function createReadStream(string $fileName, callable $callback): void
     {
         $stream = fopen($fileName, 'r');
+
+        $this->readStream($stream, $callback);
+    }
+
+    /**
+     * @param mixed $stream
+     * @param callable $callback
+     *
+     * @throws \Exception
+     */
+    private function readStream($stream, callable $callback): void
+    {
+        if (!is_resource($stream)) {
+            throw new \Exception("Stream is not a valid resource");
+        }
 
         $reader = Reader::createFromStream($stream);
 
