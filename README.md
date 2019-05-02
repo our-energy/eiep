@@ -5,6 +5,8 @@
 
 A PHP library for working with the Electricity Authority's EIEP data files. Supports PHP 7.1+.
 
+Uses [league/csv](https://github.com/thephpleague/csv) for reading and writing CSV files.
+
 Currently supported protocols and versions;
 
 | Protocol  | Version(s) |
