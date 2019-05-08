@@ -58,10 +58,11 @@ use Eiep\Eiep3\DetailRecord;
 
 // Create the report
 $report = new Report();
-$report->setReportDate(new \DateTime("2019-01-01 00:00:00"));
-$report->setUtilityType(Report::UTILITY_TYPE_ELECTRICITY);
-$report->setFileStatus(Report::FILE_STATUS_REPLACEMENT);
-$report->setNumRecords(1);
+$report
+    ->setReportDate(new \DateTime("2019-01-01 00:00:00"))
+    ->setUtilityType(Report::UTILITY_TYPE_ELECTRICITY)
+    ->setFileStatus(Report::FILE_STATUS_REPLACEMENT)
+    ->setNumRecords(1);
 
 // Create records
 $record = new DetailRecord();
