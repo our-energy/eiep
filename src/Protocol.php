@@ -88,10 +88,14 @@ trait Protocol
 
     /**
      * @param string $sender
+     *
+     * @return $this
      */
-    public function setSender(string $sender): void
+    public function setSender(string $sender)
     {
         $this->sender = $sender;
+
+        return $this;
     }
 
     /**
@@ -104,10 +108,14 @@ trait Protocol
 
     /**
      * @param string $onBehalfOf
+     *
+     * @return $this
      */
-    public function setOnBehalfOf(string $onBehalfOf): void
+    public function setOnBehalfOf(string $onBehalfOf)
     {
         $this->onBehalfOf = $onBehalfOf;
+
+        return $this;
     }
 
     /**
@@ -120,10 +128,14 @@ trait Protocol
 
     /**
      * @param string $recipient
+     *
+     * @return $this
      */
-    public function setRecipient(string $recipient): void
+    public function setRecipient(string $recipient)
     {
         $this->recipient = $recipient;
+
+        return $this;
     }
 
     /**
@@ -136,10 +148,14 @@ trait Protocol
 
     /**
      * @param string $identifier
+     *
+     * @return $this
      */
-    public function setIdentifier(string $identifier): void
+    public function setIdentifier(string $identifier)
     {
         $this->identifier = $identifier;
+
+        return $this;
     }
 
     /**
@@ -152,12 +168,15 @@ trait Protocol
 
     /**
      * @param int $numRecords
+     *
+     * @return $this
      */
-    public function setNumRecords(int $numRecords): void
+    public function setNumRecords(int $numRecords)
     {
         $this->numRecords = $numRecords;
-    }
 
+        return $this;
+    }
 
     /**
      * @return string
@@ -169,14 +188,18 @@ trait Protocol
 
     /**
      * @param DateTime $dateTime
+     *
+     * @return $this
      */
-    public function setReportDate(DateTime $dateTime): void
+    public function setReportDate(DateTime $dateTime)
     {
         $this->reportDateTime = $dateTime;
 
         $this->reportDate = $dateTime->format(self::DATE_FORMAT);
         $this->reportMonth = $dateTime->format("Ym");
         $this->reportTime = $dateTime->format("H:i:s");
+
+        return $this;
     }
 
     /**
@@ -199,13 +222,16 @@ trait Protocol
      * @param string $fileName
      * @param callable $callback
      *
+     * @return $this
      * @throws \Exception
      */
-    private function createReadStream(string $fileName, callable $callback): void
+    private function createReadStream(string $fileName, callable $callback)
     {
         $stream = fopen($fileName, 'r');
 
         $this->readStream($stream, $callback);
+
+        return $this;
     }
 
     /**

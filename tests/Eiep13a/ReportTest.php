@@ -117,7 +117,10 @@ class ReportTest extends TestCase
     public function testWriteNoRecords()
     {
         $report = new Report();
-        $report->setReportDate(new \DateTime("2019-04-27 00:00:00"));
+        $report
+            ->setReportDate(new \DateTime("2019-04-27 00:00:00"))
+            ->setReportStartDate(new \DateTime("2019-05-02 00:00:00"))
+            ->setReportEndDate(new \DateTime("2019-05-02 00:00:00"));
 
         $report->writeRecords("/tmp/output-eiep13a.txt", []);
 
@@ -129,7 +132,10 @@ class ReportTest extends TestCase
     public function testWriteEmptyRecords()
     {
         $report = new Report();
-        $report->setReportDate(new \DateTime("2019-04-27 00:00:00"));
+        $report
+            ->setReportDate(new \DateTime("2019-04-27 00:00:00"))
+            ->setReportStartDate(new \DateTime("2019-05-02 00:00:00"))
+            ->setReportEndDate(new \DateTime("2019-05-02 00:00:00"));
 
         $currentDate = date(DetailRecord::TIME_FORMAT);
 
@@ -155,12 +161,15 @@ CSV;
     public function testWriteCompleteRecords()
     {
         $report = new Report();
-        $report->setReportDate(new \DateTime("2019-04-27 00:00:00"));
-        $report->setNumRecords(1);
-        $report->setSender("Company");
-        $report->setRecipient("Recipient");
-        $report->setOnBehalfOf("Behalf");
-        $report->setIdentifier("1234567890");
+        $report
+            ->setReportDate(new \DateTime("2019-04-27 00:00:00"))
+            ->setReportStartDate(new \DateTime("2019-05-02 00:00:00"))
+            ->setReportEndDate(new \DateTime("2019-05-02 00:00:00"))
+            ->setNumRecords(1)
+            ->setSender("Company")
+            ->setRecipient("Recipient")
+            ->setOnBehalfOf("Behalf")
+            ->setIdentifier("1234567890");
 
         $record = new DetailRecord();
         $recordDate = new \DateTime("2019-04-27 00:00:00");
@@ -203,12 +212,15 @@ CSV;
     public function testWriteStream()
     {
         $report = new Report();
-        $report->setReportDate(new \DateTime("2019-04-27 00:00:00"));
-        $report->setNumRecords(3);
-        $report->setSender("Company");
-        $report->setRecipient("Recipient");
-        $report->setOnBehalfOf("Behalf");
-        $report->setIdentifier("1234567890");
+        $report
+            ->setReportDate(new \DateTime("2019-04-27 00:00:00"))
+            ->setReportStartDate(new \DateTime("2019-05-02 00:00:00"))
+            ->setReportEndDate(new \DateTime("2019-05-02 00:00:00"))
+            ->setNumRecords(3)
+            ->setSender("Company")
+            ->setRecipient("Recipient")
+            ->setOnBehalfOf("Behalf")
+            ->setIdentifier("1234567890");
 
         $record = new DetailRecord();
         $recordDate = new \DateTime("2019-04-27 00:00:00");

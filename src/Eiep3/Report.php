@@ -241,15 +241,18 @@ class Report implements EiepInterface
     /**
      * @param string $utilityType
      *
+     * @return Report
      * @throws \Exception
      */
-    public function setUtilityType(string $utilityType): void
+    public function setUtilityType(string $utilityType): Report
     {
         if (!in_array($utilityType, [self::UTILITY_TYPE_ELECTRICITY, self::UTILITY_TYPE_GAS])) {
             throw new \Exception("Utility type {$utilityType} is invalid");
         }
 
         $this->utilityType = $utilityType;
+
+        return $this;
     }
 
     /**
@@ -263,15 +266,18 @@ class Report implements EiepInterface
     /**
      * @param string $fileStatus
      *
+     * @return Report
      * @throws \Exception
      */
-    public function setFileStatus(string $fileStatus): void
+    public function setFileStatus(string $fileStatus): Report
     {
         if (!in_array($fileStatus, [self::FILE_STATUS_INITIAL, self::FILE_STATUS_REPLACEMENT, self::FILE_STATUS_PARTIAL_UPDATE])) {
             throw new \Exception("File status {$fileStatus} is invalid");
         }
 
         $this->fileStatus = $fileStatus;
+
+        return $this;
     }
 
     /**

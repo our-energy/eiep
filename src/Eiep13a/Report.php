@@ -222,10 +222,14 @@ class Report implements EiepInterface
 
     /**
      * @param DateTime $reportStartDate
+     *
+     * @return Report
      */
-    public function setReportStartDate(DateTime $reportStartDate): void
+    public function setReportStartDate(DateTime $reportStartDate): Report
     {
         $this->reportStartDate = $reportStartDate;
+
+        return $this;
     }
 
     /**
@@ -238,9 +242,13 @@ class Report implements EiepInterface
 
     /**
      * @param DateTime $reportEndDate
+     *
+     * @return Report
      */
-    public function setReportEndDate(DateTime $reportEndDate): void
+    public function setReportEndDate(DateTime $reportEndDate): Report
     {
         $this->reportEndDate = $reportEndDate;
+
+        return $this;
     }
 }

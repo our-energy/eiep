@@ -181,14 +181,15 @@ CSV;
     public function testWriteCompleteRecords()
     {
         $report = new Report();
-        $report->setReportDate(new \DateTime("2019-04-27 00:00:00"));
-        $report->setUtilityType(Report::UTILITY_TYPE_ELECTRICITY);
-        $report->setFileStatus(Report::FILE_STATUS_REPLACEMENT);
-        $report->setNumRecords(1);
-        $report->setSender("Company");
-        $report->setRecipient("Recipient");
-        $report->setOnBehalfOf("Behalf");
-        $report->setIdentifier("1234567890");
+        $report
+            ->setReportDate(new \DateTime("2019-04-27 00:00:00"))
+            ->setUtilityType(Report::UTILITY_TYPE_ELECTRICITY)
+            ->setFileStatus(Report::FILE_STATUS_REPLACEMENT)
+            ->setNumRecords(1)
+            ->setSender("Company")
+            ->setRecipient("Recipient")
+            ->setOnBehalfOf("Behalf")
+            ->setIdentifier("1234567890");
 
         $record = new DetailRecord();
         $recordDate = new \DateTime("2019-04-27 00:00:00");
@@ -227,14 +228,15 @@ CSV;
     public function testWriteStream()
     {
         $report = new Report();
-        $report->setReportDate(new \DateTime("2019-04-27 00:00:00"));
-        $report->setUtilityType(Report::UTILITY_TYPE_ELECTRICITY);
-        $report->setFileStatus(Report::FILE_STATUS_REPLACEMENT);
-        $report->setNumRecords(3);
-        $report->setSender("Company");
-        $report->setRecipient("Recipient");
-        $report->setOnBehalfOf("Behalf");
-        $report->setIdentifier("1234567890");
+        $report
+            ->setReportDate(new \DateTime("2019-04-27 00:00:00"))
+            ->setUtilityType(Report::UTILITY_TYPE_ELECTRICITY)
+            ->setFileStatus(Report::FILE_STATUS_REPLACEMENT)
+            ->setNumRecords(3)
+            ->setSender("Company")
+            ->setRecipient("Recipient")
+            ->setOnBehalfOf("Behalf")
+            ->setIdentifier("1234567890");
 
         $record = new DetailRecord();
         $recordDate = new \DateTime("2019-04-27 00:00:00");
