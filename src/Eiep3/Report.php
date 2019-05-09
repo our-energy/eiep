@@ -42,14 +42,23 @@ class Report implements EiepInterface
     private $fileStatus;
 
     /**
-     * Eiep3 constructor.
+     * Report constructor.
+     *
+     * @param null $resource
      *
      * @throws \Exception
      */
-    public function __construct()
+    public function __construct($resource = null)
     {
         $this->version = self::DEFAULT_VERSION;
         $this->setReportDate(new DateTime());
+
+        if (is_resource($resource)) {
+            $this->readHeaderFromStream($resource);
+            $this->stream = $resource;
+        } else if (is_string($resource)) {
+            $this->readHeaderFromFile($resource);
+        }
     }
 
     /**
@@ -183,6 +192,24 @@ class Report implements EiepInterface
     public function readFromStream($stream, callable $callback): void
     {
         $this->readStream($stream, function(array $row) use ($callback) {
+            $record = DetailRecord::createFromRow($row);
+
+            $callback($record);
+        });
+    }
+
+    /**
+     * @param callable $callback
+     *
+     * @throws \Exception
+     */
+    function read(callable $callback): void
+    {
+        if (!is_resource($this->stream)) {
+            throw new \Exception("No valid stream supplied");
+        }
+
+        $this->readStream($this->stream, function (array $row) use ($callback) {
             $record = DetailRecord::createFromRow($row);
 
             $callback($record);

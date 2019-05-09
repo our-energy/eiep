@@ -264,4 +264,66 @@ CSV;
 
         $this->assertEquals($expected, $output);
     }
+
+    public function testReadHeader()
+    {
+        $fileName = "tests/Data/eiep13a-valid.txt";
+
+        $report = new Report($fileName);
+
+        $this->assertEquals($report->getHeader(), [
+            'HDR', 'ICPCONS', '1.1', 'SNDR', 'BHLF', 'RCPT', '21/04/2019', '000', '00000048', '01/10/2014', '22/03/2016'
+        ]);
+    }
+
+    public function testReadHeaderNotFound()
+    {
+        $fileName = "something.txt";
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage("File not found: something.txt");
+
+        $report = new Report($fileName);
+    }
+
+    public function testReadHeaderFromStream()
+    {
+        $fileName = "tests/Data/eiep13a-valid.txt";
+
+        $stream = fopen($fileName, "r");
+
+        $report = new Report($stream);
+
+        $this->assertEquals($report->getHeader(), [
+            'HDR', 'ICPCONS', '1.1', 'SNDR', 'BHLF', 'RCPT', '21/04/2019', '000', '00000048', '01/10/2014', '22/03/2016'
+        ]);
+    }
+
+    public function testRead()
+    {
+        $fileName = "tests/Data/eiep13a-valid.txt";
+
+        $report = new Report($fileName);
+
+        $count = 0;
+
+        $report->read(function (DetailRecord $record) use (&$count) {
+            $count++;
+        });
+
+        $this->assertEquals(48, $count);
+        $this->assertEquals(48, $report->getNumRecords());
+    }
+
+    public function testReadWithoutStream()
+    {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage("No valid stream supplie");
+
+        $report = new Report();
+
+        $report->read(function (DetailRecord $record) {
+
+        });
+    }
 }

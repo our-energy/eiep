@@ -51,7 +51,7 @@ trait Protocol
     /**
      * @var int
      */
-    protected $numRecords;
+    protected $numRecords = 0;
 
     /**
      * @var string
@@ -68,6 +68,14 @@ trait Protocol
      */
     protected $header;
 
+    /**
+     * @var resource
+     */
+    protected $stream;
+
+    /**
+     * @return array
+     */
     abstract function getHeader(): array;
 
     /**
@@ -273,6 +281,42 @@ trait Protocol
 
             $callback($row);
         }
+    }
+
+    /**
+     * @param $stream
+     *
+     * @throws \Exception
+     */
+    public function readHeaderFromStream($stream): void
+    {
+        if (!is_resource($stream)) {
+            throw new \Exception("Stream is not a valid resource");
+        }
+
+        $reader = Reader::createFromStream($stream);
+
+        $header = $reader->fetchOne();
+
+        $this->validateHeader($header);
+    }
+
+    /**
+     * @param string $fileName
+     *
+     * @throws \Exception
+     */
+    public function readHeaderFromFile(string $fileName): void
+    {
+        if (!file_exists($fileName)) {
+            throw new \Exception("File not found: {$fileName}");
+
+        }
+        $stream = fopen($fileName, 'r');
+
+        $this->readHeaderFromStream($stream);
+
+        $this->stream = $stream;
     }
 
     /**
