@@ -22,11 +22,12 @@ class ReportTest extends TestCase
         $fileName = "tests/Data/eiep3-valid.txt";
 
         $records = [];
-        $icps = [];
+        $meters = [];
 
-        $report->streamFromFile($fileName, function (DetailRecord $record) use (&$records, &$icps) {
+        $report->streamFromFile($fileName, function (DetailRecord $record) use (&$records, &$icps, &$meters) {
             $records[] = $record;
             $icps[] = $record->getIcpIdentifier();
+            $meters[] = $record->getStreamIdentifier();
         });
 
         $this->assertEquals($report->getNumRecords(), count($records));
@@ -46,13 +47,69 @@ class ReportTest extends TestCase
         ]);
 
         $icps = array_values(array_unique($icps));
-        $this->assertEquals(count($icps), 2);
-        $this->assertEquals($icps, [
+        $this->assertEquals(2, count($icps));
+        $this->assertEquals([
             'XXXXXXXXXXXXXXX',
             'AAAAAAAAAAAAAAA'
-        ]);
+        ], $icps);
+
+        $meters = array_values(array_unique($meters));
+        $this->assertEquals( 2, count($meters));
+        $this->assertEquals([
+            'YYYYYYYYYY',
+            'ZZZZZZZZZZ'
+        ], $meters);
 
         $this->assertEquals($report->getFileName(), "SNDR_E_RCPT_ICPHH_201904_20190421_000.txt");
+    }
+
+    public function testReadV11File()
+    {
+        $report = new Report();
+
+        $fileName = "tests/Data/eiep3-valid-v11.txt";
+
+        $records = [];
+        $icps = [];
+        $meters = [];
+
+        $report->streamFromFile($fileName, function (DetailRecord $record) use (&$records, &$icps, &$meters) {
+            $records[] = $record;
+            $icps[] = $record->getIcpIdentifier();
+            $meters[] = $record->getStreamIdentifier();
+        });
+
+        $this->assertEquals($report->getNumRecords(), count($records));
+        $this->assertEquals($report->getNumRecords(),312);
+        $this->assertEquals($report->getUtilityType(), 'E');
+        $this->assertEquals($report->getFileStatus(), 'R');
+        $this->assertEquals($report->getVersion(), '11.0');
+        $this->assertEquals($report->getSender(), 'SNDR');
+        $this->assertEquals($report->getOnBehalfOf(), 'BHLF');
+        $this->assertEquals($report->getRecipient(), 'RCPT');
+        $this->assertEquals($report->getIdentifier(), '000');
+        $this->assertEquals($report->getReportDate(), '25/10/2019');
+        $this->assertEquals($report->getReportMonth(), '201910');
+        $this->assertEquals($report->getReportTime(), '10:04:24');
+        $this->assertEquals($report->getHeader(), [
+            'HDR', 'ICPHH', '11.0', 'SNDR', 'BHLF', 'RCPT', '25/10/2019', '10:04:24', '000', '00000312', '201910', 'E', 'R'
+        ]);
+
+        $icps = array_values(array_unique($icps));
+        $this->assertEquals(count($icps), 1);
+        $this->assertEquals($icps, [
+            'XXXXXXXXXXXXXXX'
+        ]);
+
+        $meters = array_values(array_unique($meters));
+        $this->assertEquals( 3, count($meters));
+        $this->assertEquals([
+            'YYYYYYYYYY',
+            'ZZZZZZZZZZ',
+            'AAAAAAAAAA'
+        ], $meters);
+
+        $this->assertEquals($report->getFileName(), "SNDR_E_RCPT_ICPHH_201910_20191025_000.txt");
     }
 
     public function testReadStream()
@@ -149,6 +206,19 @@ class ReportTest extends TestCase
 
         $output = file_get_contents("/tmp/output-eiep3.txt");
 
+        $this->assertEquals($output, "HDR,ICPHH,11.0,,,,27/04/2019,00:00:00,,00000000,201904,," . PHP_EOL);
+    }
+
+    public function testWriteVersion()
+    {
+        $report = new Report();
+        $report->setReportDate(new \DateTime("2019-04-27 00:00:00"));
+        $report->setVersion(Report::VERSION_10);
+
+        $report->writeRecords("/tmp/output-eiep3.txt", []);
+
+        $output = file_get_contents("/tmp/output-eiep3.txt");
+
         $this->assertEquals($output, "HDR,ICPHH,10.0,,,,27/04/2019,00:00:00,,00000000,201904,," . PHP_EOL);
     }
 
@@ -168,7 +238,7 @@ class ReportTest extends TestCase
         $currentDate = date(DetailRecord::DATE_FORMAT);
 
         $expected = <<<CSV
-HDR,ICPHH,10.0,,,,27/04/2019,00:00:00,,00000002,201904,,
+HDR,ICPHH,11.0,,,,27/04/2019,00:00:00,,00000002,201904,,
 DET,,,,$currentDate,,null,null,null,,null
 DET,,,,$currentDate,,null,null,null,,null
 
@@ -215,7 +285,7 @@ CSV;
         $output = file_get_contents("/tmp/output-eiep3.txt");
 
         $expected = <<<CSV
-HDR,ICPHH,10.0,Comp,Beha,Reci,27/04/2019,00:00:00,1234567890,00000003,201904,E,R
+HDR,ICPHH,11.0,Comp,Beha,Reci,27/04/2019,00:00:00,1234567890,00000003,201904,E,R
 DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null
 DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null
 DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null
@@ -267,7 +337,7 @@ CSV;
         $output = file_get_contents("/tmp/output-eiep3.txt");
 
         $expected = <<<CSV
-HDR,ICPHH,10.0,Comp,Beha,Reci,27/04/2019,00:00:00,1234567890,00000003,201904,E,R
+HDR,ICPHH,11.0,Comp,Beha,Reci,27/04/2019,00:00:00,1234567890,00000003,201904,E,R
 DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null
 DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null
 DET,1234567890,ABCDEFG,F,27/04/2019,48,1.00,2.00,3.00,X,null

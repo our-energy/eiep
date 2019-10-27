@@ -11,7 +11,7 @@ Currently supported protocols and versions;
 
 | Protocol  | Version(s) |
 | ------------- | ------------- |
-| EIEP3  | 10.0  |
+| EIEP3  | 10.0, 11.0  |
 | EIEP13a  | 1.1  |
 
 ## Installation

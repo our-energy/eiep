@@ -87,6 +87,18 @@ trait Protocol
     }
 
     /**
+     * @param string $version
+     *
+     * @return $this
+     */
+    public function setVersion(string $version)
+    {
+        $this->version = $version;
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getSender(): string
@@ -310,8 +322,8 @@ trait Protocol
     {
         if (!file_exists($fileName)) {
             throw new \Exception("File not found: {$fileName}");
-
         }
+
         $stream = fopen($fileName, 'r');
 
         $this->readHeaderFromStream($stream);

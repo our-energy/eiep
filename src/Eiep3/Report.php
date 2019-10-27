@@ -17,9 +17,18 @@ class Report implements EiepInterface
     use Protocol;
 
     const FILE_TYPE = 'ICPHH';
-    const SUPPORTED_VERSIONS = ['10.0'];
-    const DEFAULT_VERSION = '10.0';
+
+    const VERSION_10 = '10.0';
+    const VERSION_11 = '11.0';
+
+    const SUPPORTED_VERSIONS = [
+        self::VERSION_10,
+        self::VERSION_11
+    ];
+
+    const DEFAULT_VERSION = self::VERSION_11;
     const NUM_HEADER_COLUMNS = 13;
+
     const DATE_FORMAT = 'd/m/Y';
 
     const FILE_STATUS_INITIAL = 'I';
@@ -176,7 +185,7 @@ class Report implements EiepInterface
      */
     public function streamFromFile(string $fileName, callable $callback): void
     {
-        $this->createReadStream($fileName, function(array $row) use ($callback) {
+        $this->createReadStream($fileName, function (array $row) use ($callback) {
             $record = DetailRecord::createFromRow($row);
 
             $callback($record);
@@ -191,7 +200,7 @@ class Report implements EiepInterface
      */
     public function readFromStream($stream, callable $callback): void
     {
-        $this->readStream($stream, function(array $row) use ($callback) {
+        $this->readStream($stream, function (array $row) use ($callback) {
             $record = DetailRecord::createFromRow($row);
 
             $callback($record);
